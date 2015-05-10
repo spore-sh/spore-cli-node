@@ -175,34 +175,54 @@ program
   });
 
 program
-  .command('run [command]')
-  .alias('exec [command]')
+  .command('run [commands...]')
+  .alias('exec [commands...]')
   .option('-d, --directory <directory>', "Directory in which to look for a .envy file")
   .option('-a, --app <appName>', "Name of the application")
   .option('-e, --env <envName>', "Name of the environment")
   .description("Run a command with Envy environment variables loaded")
-  .action(function (cmd, options) {
+  .action(function (cmds, options) {
     ensureLogin(function () {
       var dir = path.resolve(process.cwd(), options.directory || ".");
 
       envy.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
         if(err) return error(err);
 
+        // TODO
+        // Fallback to a local .envy so this command can run offline
         envy.getDotEnvy(appName, envName, function (err, env) {
           if(err) return error(err);
 
-          var child = spawn(cmd, { cwd: process.cwd(), env: env });
+          // use the current environment for defaults
+          for(var p in process.env) {
+            if(env[p] === undefined) {
+              env[p] = process.env[p];
+            }
+          }
+
+          var cmd = cmds.shift(),
+              args = cmds;
+
+          var child = spawn(cmd, args, { env: env });
 
           child.stdout.on('data', function (data) {
-            info(data);
+            process.stdout.write(data);
           });
 
           child.stderr.on('data', function (data) {
-            error(new Error(data));
+            process.stderr.write(data);
+          });
+
+          child.on('error', function (err) {
+            error(err);
           });
 
           child.on('close', function (code) {
-            console.log(cmd + " exited with code " + code);
+            if(code === 0) {
+              info(cmd + " exited with code " + code);
+            } else {
+              error(new Error(cmd + " exited with code " + code));
+            }
             process.exit(0);
           });
         });
