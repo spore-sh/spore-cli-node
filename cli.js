@@ -64,9 +64,7 @@ program
         if(err) return error(err);
 
         if(apps.length) {
-          info("Apps:\n" + apps.map(function (app) {
-            return app.name;
-          }).join("\n"));
+          info(apps.join("\n"));
         } else {
           warn("No Apps found.");
           help("Create a new app with `envy new`.");
