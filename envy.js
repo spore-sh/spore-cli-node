@@ -13,7 +13,7 @@ Envy.prototype.signup = function (email, password, callback) {
     if(err) return callback(err);
     
     try {
-      self.setKey(user.email, user.key);
+      self._setKey(user.email, user.key);
     } catch(e) {
       return callback(e);
     }
@@ -28,7 +28,7 @@ Envy.prototype.login = function (email, password, callback) {
     if(err) return callback(err);
     
     try {
-      self.setKey(user.email, user.key);
+      self._setKey(user.email, user.key);
     } catch(e) {
       return callback(e);
     }
@@ -37,7 +37,11 @@ Envy.prototype.login = function (email, password, callback) {
   });
 };
 
-Envy.prototype.setKey = function (email, key) {
+Envy.prototype.listApps = function (callback) {
+  this.api.listApps(callback);
+};
+
+Envy.prototype._setKey = function (email, key) {
   if(!key) throw new Error("Key can't be blank.");
 
   netrc.read();
@@ -52,4 +56,18 @@ Envy.prototype.setKey = function (email, key) {
   this.api.setKey(key);
 
   netrc.write();
+};
+
+Envy.prototype.getKey = function () {
+  var key;
+
+  try {
+    key = netrc.host(this.host).password;
+
+    this.api.setKey(key);
+  } catch(e) {
+    return false;
+  }
+
+  return key;
 };
