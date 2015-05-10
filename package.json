@@ -12,9 +12,7 @@
     "colors": "^1.1.0",
     "commander": "^2.8.1",
     "envy-api": "git+ssh://git@github.com:Teleborder/envy-api-node.git",
-    "minimist": "^1.1.1",
     "netrc-rw": "0.0.1",
-    "readline-sync": "^1.2.14",
-    "request": "^2.55.0"
+    "readline-sync": "^1.2.14"
   }
 }
