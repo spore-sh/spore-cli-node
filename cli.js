@@ -21,12 +21,10 @@ program
 
     if(!email || !password) error(new Error("Email and password are required."));
 
-    envy.signup(email, password, function (err, key) {
+    envy.signup(email, password, function (err, user) {
       if(err) error(err);
 
-      envy.setKey(email, key);
-
-      console.log("Signed up for Envy.");
+      console.log("Account created for " + user.email + ".");
     });
   });
 
@@ -42,12 +40,10 @@ program
 
     if(!email || !password) error(new Error("Email and password are required."));
 
-    envy.login(email, password, function (err, key) {
+    envy.login(email, password, function (err, user) {
       if(err) error(err);
 
-      envy.setKey(email, key);
-
-      console.log("Logged in to Envy.");
+      console.log("Logged in as " + user.email + ".");
     });
   });
 
