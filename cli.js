@@ -83,21 +83,44 @@ program
   .action(function (dir, options) {
     ensureLogin(function () {
       var appName = options.appName;
-      dir = path.resolve(process.cwd(), dir);
+      dir = path.resolve(process.cwd(), dir || ".");
 
       if(!appName) {
         appName = envy.lookupName(dir);
       }
 
       envy.api.createApp(appName, function (err, app) {
-        if(err.message === "App already exists.") {
-
+        if(err.message === "App already exists") {
+          error(err);
+          help("Download your environment variables with `envy download`.");
+          return;
         }
+
+        if(err) return error(err);
 
         envy.writeDotEnvy(app.name, dir, function (err) {
           if(err) return error(err);
 
           info(app.name + " created.");
+        });
+      });
+    });
+  });
+
+program
+  .command('download [dir]')
+  .option('-a, --app <appName>', "Name of the application")
+  .option('-e, --env <envName>', "Name of the environment")
+  .description("Download a local copy of your environment variables")
+  .action(function (dir, options) {
+    ensureLogin(function () {
+      dir = path.resolve(process.cwd(), dir || ".");
+
+      envy.getAppAndEnv(dir, options.appName, options.envName, function (appName, envName) {
+        envy.writeDotEnvy(appName, envName, dir, function (err) {
+          if(err) return error(err);
+
+          info("Environment variables for " + appName + "/" + envName + " downloaded.");
         });
       });
     });
@@ -119,19 +142,19 @@ program
       key = set.substring(0, set.indexOf('='));
       value = set.substring(set.indexOf('=') + 1);
 
-      getAppAndEnv(process.cwd(), options.appName, options.envName, function (appName, envName) {
+      envy.getAppAndEnv(process.cwd(), options.appName, options.envName, function (appName, envName) {
         envy.api.set(appName, envName, key, value, function (err) {
           if(err) return error(err);
 
-          log("`" + key + "` updated to `" + value + "` for app: `" + appName + "` in environment: `" + envName + "`.");
+          info("`" + key + "` updated to `" + value + "` for " + appName + "/" + envName + ".");
 
           // only write the dot-envy back to this directory
           // if it's the right app and environment
           // (i.e. they weren't setting a variable for a different app)
-          getAppAndEnv(process.cwd(), null, null, function (defaultApp, defaultEnv) {
+          envy.getAppAndEnv(process.cwd(), null, null, function (defaultApp, defaultEnv) {
             if(defaultApp === appName && defaultEnv === envName) {
               envy.writeDotEnvy(appName, envName, process.cwd(), function (err) {
-                log("local environment variables updated.");
+                info("local environment variables updated.");
               });
             } else {
               help("`" + key + "` was not updated locally because the local app/environment of " + defaultApp + "/" + defaultEnv + " didn't match the one you set.");
@@ -141,34 +164,6 @@ program
       });
     });
   });
-
-function getAppAndEnv(dir, appName, envName, callback) {
-  if(appName && envName) {
-    return callback(appName, envName);
-  }
-
-  envy.readDotEnvy(dir, function (err, vars) {
-    if(err) return error(err);
-
-    if(!appName) {
-      appName = vars.ENVY_APP_NAME;
-    }
-
-    if(!appName) {
-      appName = envy.lookupName(dir);
-    }
-
-    if(!envName) {
-      envName = vars.ENVY_ENV_NAME;
-    }
-
-    if(!envName) {
-      envName = envy.defaultEnv;
-    }
-
-    callback(appName, envName);
-  });
-}
 
 function ensureLogin(callback) {
   if(envy.getKey()) {

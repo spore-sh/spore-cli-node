@@ -9,6 +9,8 @@ function Envy(options) {
   this.api = new EnvyApi(options);
   this.dotEnvy = ".envy";
   this.defaultEnv = "development";
+  this.appNameVar = "ENVY_APP_NAME";
+  this.envNameVar = "ENVY_ENV_NAME";
 }
 
 Envy.prototype.signup = function (email, password, callback) {
@@ -41,6 +43,23 @@ Envy.prototype.login = function (email, password, callback) {
   });
 };
 
+Envy.prototype.getAppAndEnv = function(dir, appName, envName, callback) {
+  var envy = this;
+
+  if(appName && envName) {
+    return callback(null, appName, envName);
+  }
+
+  envy.readDotEnvy(dir, function (err, vars) {
+    if(err) return callback(err);
+
+    appName = appName || vars[envy.appNameVar] || envy.lookupName(dir);
+    envName = envName || vars[envy.envNameVar] || envy.defaultEnv;
+
+    callback(null, appName, envName);
+  });
+};
+
 Envy.prototype.readDotEnvy = function (dir, callback) {
   fs.readFile(path.join(dir, this.dotEnvy), { encoding: 'utf8' }, function (err, contents) {
     var vars = {};
@@ -61,11 +80,16 @@ Envy.prototype.readDotEnvy = function (dir, callback) {
           line = line.substring(0, line.indexOf('#'));
         }
 
+        // skip blank lines
+        if(line === "") {
+          return;
+        }
+
         var key,
             value;
 
         if(line.indexOf('=') === -1) {
-          throw new Error("Invalid assignment on line " + i + ". " + line + " does not contain an `=`.");
+          throw new Error("Invalid assignment on line " + i + 1 + ". " + line + " does not contain an `=`.");
         }
 
         key = line.substring(0, line.indexOf('='));
