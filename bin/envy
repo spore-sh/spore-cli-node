@@ -4,6 +4,7 @@ var program = require('commander'),
     path = require('path'),
     readline = require('readline-sync'),
     colors = require('colors'),
+    spawn = require('child_process').spawn,
     pkg = require('../package.json'),
     Envy = require('../lib/envy'),
     envy = new Envy();
@@ -116,7 +117,9 @@ program
     ensureLogin(function () {
       dir = path.resolve(process.cwd(), dir || ".");
 
-      envy.getAppAndEnv(dir, options.appName, options.envName, function (appName, envName) {
+      envy.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
+        if(err) return error(err);
+
         envy.writeDotEnvy(appName, envName, dir, function (err) {
           if(err) return error(err);
 
@@ -128,6 +131,7 @@ program
 
 program
   .command('set [KEY=value]')
+  .option('-d, --directory <directory>', "Directory in which to look for a .envy file")
   .option('-a, --app <appName>', "Name of the application")
   .option('-e, --env <envName>', "Name of the environment")
   .description("Set an environment variable")
@@ -137,12 +141,15 @@ program
     }
     ensureLogin(function () {
       var key,
-          value;
+          value,
+          dir = path.resolve(process.cwd(), options.directory || ".");
 
       key = set.substring(0, set.indexOf('='));
       value = set.substring(set.indexOf('=') + 1);
 
-      envy.getAppAndEnv(process.cwd(), options.appName, options.envName, function (appName, envName) {
+      envy.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
+        if(err) return error(err);
+
         envy.api.set(appName, envName, key, value, function (err) {
           if(err) return error(err);
 
@@ -151,14 +158,52 @@ program
           // only write the dot-envy back to this directory
           // if it's the right app and environment
           // (i.e. they weren't setting a variable for a different app)
-          envy.getAppAndEnv(process.cwd(), null, null, function (defaultApp, defaultEnv) {
+          envy.getAppAndEnv(dir, null, null, function (err, defaultApp, defaultEnv) {
+            if(err) return error(err);
+
             if(defaultApp === appName && defaultEnv === envName) {
-              envy.writeDotEnvy(appName, envName, process.cwd(), function (err) {
+              envy.writeDotEnvy(appName, envName, dir, function (err) {
                 info("local environment variables updated.");
               });
             } else {
               help("`" + key + "` was not updated locally because the local app/environment of " + defaultApp + "/" + defaultEnv + " didn't match the one you set.");
             }
+          });
+        });
+      });
+    });
+  });
+
+program
+  .command('run [command]')
+  .alias('exec [command]')
+  .option('-d, --directory <directory>', "Directory in which to look for a .envy file")
+  .option('-a, --app <appName>', "Name of the application")
+  .option('-e, --env <envName>', "Name of the environment")
+  .description("Run a command with Envy environment variables loaded")
+  .action(function (cmd, options) {
+    ensureLogin(function () {
+      var dir = path.resolve(process.cwd(), options.directory || ".");
+
+      envy.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
+        if(err) return error(err);
+
+        envy.getDotEnvy(appName, envName, function (err, env) {
+          if(err) return error(err);
+
+          var child = spawn(cmd, { cwd: process.cwd(), env: env });
+
+          child.stdout.on('data', function (data) {
+            info(data);
+          });
+
+          child.stderr.on('data', function (data) {
+            error(new Error(data));
+          });
+
+          child.on('close', function (code) {
+            console.log(cmd + " exited with code " + code);
+            process.exit(0);
           });
         });
       });
