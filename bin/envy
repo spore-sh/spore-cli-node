@@ -2,11 +2,11 @@
 
 var program = require('commander'),
     path = require('path'),
-    Envy = require('./envy'),
-    envy = new Envy(),
-    pkg = require('./package.json'),
     readline = require('readline-sync'),
-    colors = require('colors');
+    colors = require('colors'),
+    pkg = require('../package.json'),
+    Envy = require('../lib/envy'),
+    envy = new Envy();
 
 colors.setTheme({
   silly: 'rainbow',
@@ -21,6 +21,8 @@ colors.setTheme({
   error: 'red'
 });
 
+process.title = program._name = "envy";
+
 program
   .version(pkg.version);
 
@@ -31,8 +33,8 @@ program
   .description("Create an Envy account")
   .action(function (options) {
 
-    var email = options.email || readline.question("Email: "),
-        password = options.password || readline.question("Password: ", { hideEchoBack: true });
+    var email = options.email || readline.question("Email: ".prompt),
+        password = options.password || readline.question("Password: ".prompt, { hideEchoBack: true });
 
     if(!email || !password) return error(new Error("Email and password are required."));
 
@@ -172,8 +174,8 @@ function ensureLogin(callback) {
 }
 
 function login(email, password, callback) {
-  email = email || readline.question("Email: ");
-  password = password || readline.question("Password: ", { hideEchoBack: true });
+  email = email || readline.question("Email: ".prompt);
+  password = password || readline.question("Password: ".prompt, { hideEchoBack: true });
 
   if(!email || !password) return error(new Error("Email and password are required."));
 
