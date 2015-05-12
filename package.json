@@ -14,8 +14,10 @@
   "dependencies": {
     "colors": "^1.1.0",
     "commander": "^2.8.1",
-    "spore-api": "git+ssh://git@github.com:Teleborder/spore-api-node.git",
+    "debug": "^2.2.0",
+    "fs-extra": "^0.18.3",
     "netrc-rw": "0.0.1",
-    "readline-sync": "^1.2.14"
+    "readline-sync": "^1.2.14",
+    "spore-api": "git+ssh://git@github.com:Teleborder/spore-api-node.git"
   }
 }
