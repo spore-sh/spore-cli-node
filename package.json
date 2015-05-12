@@ -1,19 +1,19 @@
 {
-  "name": "envy-cli",
+  "name": "spore-cli",
   "version": "0.0.1",
-  "description": "CLI for ency",
+  "description": "CLI for Spore",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "envy": "bin/envy"
+    "spore": "bin/spore"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Trey Griffith <trey@teleborder.com>",
+  "license": "MIT",
   "dependencies": {
     "colors": "^1.1.0",
     "commander": "^2.8.1",
-    "envy-api": "git+ssh://git@github.com:Teleborder/envy-api-node.git",
+    "spore-api": "git+ssh://git@github.com:Teleborder/spore-api-node.git",
     "netrc-rw": "0.0.1",
     "readline-sync": "^1.2.14"
   }

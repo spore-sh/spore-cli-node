@@ -1,0 +1,13 @@
+use a centralized cache
+- remove download
+- fallback to cache if no download available
+
+envy get - see current variables
+
+migrate
+- heroku (set envy key on heroku server)
+  - how to distinguish production and staging?
+- dotenv
+
+install script
+- curl install.domain.com | sh

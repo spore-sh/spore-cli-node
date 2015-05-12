@@ -6,8 +6,8 @@ var program = require('commander'),
     colors = require('colors'),
     spawn = require('child_process').spawn,
     pkg = require('../package.json'),
-    Envy = require('../lib/envy'),
-    envy = new Envy();
+    Spore = require('../lib/spore'),
+    spore = new Spore();
 
 colors.setTheme({
   silly: 'rainbow',
@@ -22,7 +22,7 @@ colors.setTheme({
   error: 'red'
 });
 
-process.title = program._name = "envy";
+process.title = program._name = "spore";
 
 program
   .version(pkg.version);
@@ -31,7 +31,7 @@ program
   .command('signup')
   .option("-e, --email <email>", "Email to sign up with")
   .option("-p, --password <password>", "Password to sign up with")
-  .description("Create an Envy account")
+  .description("Create an Spore account")
   .action(function (options) {
 
     var email = options.email || readline.question("Email: ".prompt),
@@ -39,7 +39,7 @@ program
 
     if(!email || !password) return error(new Error("Email and password are required."));
 
-    envy.signup(email, password, function (err, user) {
+    spore.signup(email, password, function (err, user) {
       if(err) return error(err);
 
       info("Account created for " + user.email + ".");
@@ -50,7 +50,7 @@ program
   .command('login')
   .option("-e, --email <email>", "Email to log in with")
   .option("-p, --password <password>", "Password to log in with")
-  .description("Log in to your Envy account")
+  .description("Log in to your Spore account")
   .action(function (options) {
 
     login(options.email, options.password, function (_, user) {
@@ -63,14 +63,14 @@ program
   .description("List all the apps you have access to")
   .action(function () {
     ensureLogin(function () {
-      envy.api.listApps(function (err, apps) {
+      spore.api.listApps(function (err, apps) {
         if(err) return error(err);
 
         if(apps.length) {
           info(apps.join("\n"));
         } else {
           warn("No Apps found.");
-          help("Create a new app with `envy new`.");
+          help("Create a new app with `spore new`.");
         }
       });
     });
@@ -80,26 +80,26 @@ program
   .command('new [dir]')
   .alias('init [dir]')
   .option('-a, --app <appName>', "Name of the application")
-  .description("Add a new app to Envy")
+  .description("Add a new app to Spore")
   .action(function (dir, options) {
     ensureLogin(function () {
       var appName = options.appName;
       dir = path.resolve(process.cwd(), dir || ".");
 
       if(!appName) {
-        appName = envy.lookupName(dir);
+        appName = spore.lookupName(dir);
       }
 
-      envy.api.createApp(appName, function (err, app) {
+      spore.api.createApp(appName, function (err, app) {
         if(err.message === "App already exists") {
           error(err);
-          help("Download your environment variables with `envy download`.");
+          help("Download your environment variables with `spore checkout`.");
           return;
         }
 
         if(err) return error(err);
 
-        envy.writeDotEnvy(app.name, dir, function (err) {
+        spore.writeDotSpore(app.name, dir, function (err) {
           if(err) return error(err);
 
           info(app.name + " created.");
@@ -109,7 +109,7 @@ program
   });
 
 program
-  .command('download [dir]')
+  .command('checkout [dir]')
   .option('-a, --app <appName>', "Name of the application")
   .option('-e, --env <envName>', "Name of the environment")
   .description("Download a local copy of your environment variables")
@@ -117,13 +117,13 @@ program
     ensureLogin(function () {
       dir = path.resolve(process.cwd(), dir || ".");
 
-      envy.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
+      spore.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
         if(err) return error(err);
 
-        envy.writeDotEnvy(appName, envName, dir, function (err) {
+        spore.writeDotSpore(appName, envName, dir, function (err) {
           if(err) return error(err);
 
-          info("Environment variables for " + appName + "/" + envName + " downloaded.");
+          info("Environment variables for " + appName + "/" + envName + " checked out.");
         });
       });
     });
@@ -131,7 +131,7 @@ program
 
 program
   .command('set [KEY=value]')
-  .option('-d, --directory <directory>', "Directory in which to look for a .envy file")
+  .option('-d, --directory <directory>', "Directory in which to look for a .spore file")
   .option('-a, --app <appName>', "Name of the application")
   .option('-e, --env <envName>', "Name of the environment")
   .description("Set an environment variable")
@@ -147,22 +147,22 @@ program
       key = set.substring(0, set.indexOf('='));
       value = set.substring(set.indexOf('=') + 1);
 
-      envy.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
+      spore.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
         if(err) return error(err);
 
-        envy.api.set(appName, envName, key, value, function (err) {
+        spore.api.set(appName, envName, key, value, function (err) {
           if(err) return error(err);
 
           info("`" + key + "` updated to `" + value + "` for " + appName + "/" + envName + ".");
 
-          // only write the dot-envy back to this directory
+          // only write the dot-spore back to this directory
           // if it's the right app and environment
           // (i.e. they weren't setting a variable for a different app)
-          envy.getAppAndEnv(dir, null, null, function (err, defaultApp, defaultEnv) {
+          spore.getAppAndEnv(dir, null, null, function (err, defaultApp, defaultEnv) {
             if(err) return error(err);
 
             if(defaultApp === appName && defaultEnv === envName) {
-              envy.writeDotEnvy(appName, envName, dir, function (err) {
+              spore.writeDotSpore(appName, envName, dir, function (err) {
                 info("local environment variables updated.");
               });
             } else {
@@ -177,20 +177,20 @@ program
 program
   .command('run [commands...]')
   .alias('exec [commands...]')
-  .option('-d, --directory <directory>', "Directory in which to look for a .envy file")
+  .option('-d, --directory <directory>', "Directory in which to look for a .spore file")
   .option('-a, --app <appName>', "Name of the application")
   .option('-e, --env <envName>', "Name of the environment")
-  .description("Run a command with Envy environment variables loaded")
+  .description("Run a command with Spore environment variables loaded")
   .action(function (cmds, options) {
     ensureLogin(function () {
       var dir = path.resolve(process.cwd(), options.directory || ".");
 
-      envy.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
+      spore.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
         if(err) return error(err);
 
         // TODO
-        // Fallback to a local .envy so this command can run offline
-        envy.getDotEnvy(appName, envName, function (err, env) {
+        // Fallback to a local .spore so this command can run offline
+        spore.getDotSpore(appName, envName, function (err, env) {
           if(err) return error(err);
 
           // use the current environment for defaults
@@ -231,7 +231,7 @@ program
   });
 
 function ensureLogin(callback) {
-  if(envy.getKey()) {
+  if(spore.getKey()) {
     return callback(null, true);
   }
 
@@ -244,7 +244,7 @@ function login(email, password, callback) {
 
   if(!email || !password) return error(new Error("Email and password are required."));
 
-  envy.login(email, password, function (err, user) {
+  spore.login(email, password, function (err, user) {
     if(err) error(err);
 
     callback(null, user);
