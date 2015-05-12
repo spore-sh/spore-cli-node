@@ -1,13 +1,59 @@
-use a centralized cache
-- remove download
-- fallback to cache if no download available
+hash the .spore file and store it in version control
+- show all environments in one file
+- show all keys, hash the values (uid (3-4 characters?))
+- should every key have a value for every environment (even if the value is null)?
 
-envy get - see current variables
+~/.spore/:app_id/:env_name/:id ?
+~/.spore/:app_id/:env_name ?
+~/.spore/:app_id ?
+
+- should the same keys in different environments in the same app have the same hash?
+- should the same keys in different environments in different apps have the same hash?
+- probably not - defeats the purpose of separating them out
+
+make spore work without a central server
+- can share .spore file with anyone and they get access to the same stuff that you do
+- that way, can keep the actual server itself closed source
+- can the .spore directory work as a pseudo central server for local development? sync with the server later?
+  - would require uuid instead of small (3-4 character) ids
+    - can get down to 10 characters (64 bits with Z85) if you're willing to accept p=10^-15 after 190 hashes (p=10^-12 after 6100 hashes)
+    - `crypto.randomBytes(8)`
+    - 15 characters (96 bits) would provide p=10^-15 after 13m hashes
+    - 20 characters => 820b hashes
+- maybe open source the server too - try to drive adoption
+- call the server spore-pod
+  - hosted version free for up to 5 users
+  - $50/month for a team of up to 10
+  - $200/month for a team of up to 20
+  - $10/user/month after that?
+- is it still valuable without the central server?
+
+separate read/write access
+- all devs get write access on everything (writing == creating new hash)
+- only certain devs get read access on everything
+- get read access on hashes in certain environments (i.e. development)
+
+use a centralized cache
+- remove `download`
+- directory with hashes, and their corresponding values as their contents
+- fallback to cache if no download available
+- have a version of `run` that doesn't save to a cache (for production/staging)
+
+have settings in the central cache
+- which host/port/protocol to use by default
+- default environment
+- name of the file in local directories (i.e. .spore)
+- netrc file to use
+
+have `set` be a prompt
+- don't put the value in the shell itself, put it through stdin
+- have a special `setall` to set a value on all of the environments
 
 migrate
-- heroku (set envy key on heroku server)
+- heroku (set spore key on heroku server)
   - how to distinguish production and staging?
 - dotenv
 
 install script
-- curl install.domain.com | sh
+- curl install.spore.sh | sh
+  - should make sure npm is installed: `curl -L https://www.npmjs.com/install.sh | sh`
