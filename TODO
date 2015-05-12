@@ -3,16 +3,12 @@ hash the .spore file and store it in version control
 - show all keys, hash the values (uid (3-4 characters?))
 - should every key have a value for every environment (even if the value is null)?
 
-~/.spore/:app_id/:env_name/:id ?
-~/.spore/:app_id/:env_name ?
-~/.spore/:app_id ?
-
-- should the same keys in different environments in the same app have the same hash?
-- should the same keys in different environments in different apps have the same hash?
-- probably not - defeats the purpose of separating them out
+~/.spore/apps/:app_id/:env_name/:id ?
+~/.spore/apps/:app_id/:env_name ?
+~/.spore/apps/:app_id ?
 
 make spore work without a central server
-- can share .spore file with anyone and they get access to the same stuff that you do
+- can share .spore directory with anyone and they get access to the same stuff that you do
 - that way, can keep the actual server itself closed source
 - can the .spore directory work as a pseudo central server for local development? sync with the server later?
   - would require uuid instead of small (3-4 character) ids

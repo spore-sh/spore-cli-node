@@ -1,5 +1,5 @@
 {
-  "host": "pod.spore.sh",
+  "host": "https://pod.spore.sh",
   "sporeFile": ".spore",
   "defaultEnv": "development"
 }
