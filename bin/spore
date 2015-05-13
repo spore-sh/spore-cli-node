@@ -139,6 +139,70 @@ program
     });
   });
 
+program
+  .command('get [key]')
+  .option('-d, --directory <directory>', "Directory in which contains the Spore")
+  .option('-e, --env <envName>', "Name of the environment")
+  .description("Get environment variable(s) for a Spore app")
+  .action(function (key, options) {
+
+    spore.loadApp(resolvePath(process.cwd(), options.directory || '.'), function (err, app) {
+      if(err) return error(err);
+
+      spore.defaultEnv(function (err, envName) {
+        if(err) return error(err);
+
+        envName = options.envName || envName;
+
+        if(key) {
+          app.get(envName, key, function (err, val) {
+            if(err) return error(err);
+
+            printKv(key, val);
+          });
+          return;
+        }
+
+        app.get(envName, function (err, kv) {
+          if(err) return error(err);
+
+          printKvs(kv);
+        });
+      });
+    });
+  });
+
+program
+  .command('get-all [key]')
+  .option('-d, --directory <directory>', "Directory in which contains the Spore")
+  .description("Get environment variable(s) for all environments of a Spore app")
+  .action(function (key, options) {
+
+    spore.loadApp(resolvePath(process.cwd(), options.directory || '.'), function (err, app) {
+      if(err) return error(err);
+
+      if(key) {
+        app.getAll(key, function (err, envs) {
+          if(err) return error(err);
+
+          Object.keys(envs).forEach(function (envName) {
+            log(envName + ":");
+
+            printKvs(envs[envName], 2);
+          });
+        });
+
+        return;
+      }
+
+      app.getAll(function (err, kv) {
+        if(err) return error(err);
+
+        printKvs(kv);
+      });
+    });
+  });
+
 
 program
   .command('run [commands...]')
@@ -195,6 +259,21 @@ function login(email, password, callback) {
 
     callback(null, user);
   });
+}
+
+function printKvs(kv, tabs) {
+  Object.keys(kv).forEach(function (key) {
+    printKv(key, kv[key], tabs);
+  });
+}
+
+function printKv(key, value, tabs) {
+  tabs = tabs || 0;
+  log(new Array(tabs + 1).join(' ').split('') + key + "=" + value);
+}
+
+function log(message) {
+  console.log(message.data);
 }
 
 function error(err) {
