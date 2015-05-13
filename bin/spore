@@ -120,6 +120,27 @@ program
   });
 
 program
+  .command('set-all [key]')
+  .option('-d, --directory <directory>', "Directory in which contains the Spore")
+  .description("Set an environment variable for all environments of a Spore app")
+  .action(function (key, options) {
+
+    spore.loadApp(resolvePath(process.cwd(), options.directory || '.'), function (err, app) {
+      if(err) return error(err);
+        var value = readline.question(key + "=".prompt);
+
+      app.setAll(key, value, function (err) {
+        if(err) return error(err);
+
+        info(key + " set for " + app.name + "/" + app.envs.map(function (env) {
+          return env.name;
+        }));
+      });
+    });
+  });
+
+
+program
   .command('run [commands...]')
   .alias('exec [commands...]')
   .option('-d, --directory <directory>', "Directory in which contains the Spore")
