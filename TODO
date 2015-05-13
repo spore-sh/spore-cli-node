@@ -41,6 +41,9 @@ have `set` be a prompt
 - don't put the value in the shell itself, put it through stdin
 - have a special `setall` to set a value on all of the environments
 
+
+have a special api key for each environment that only maps to that environment (i.e. you don't need to specify the environment)
+
 migrate
 - heroku (set spore key on heroku server)
   - how to distinguish production and staging?
