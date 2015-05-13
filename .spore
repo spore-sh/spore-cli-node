@@ -1,0 +1,9 @@
+{
+  "name": "spore-cli",
+  "id": "d30b14ab-2085-406c-9a4d-5b02ddaee157",
+  "envs": {
+    "development": {},
+    "staging": {},
+    "production": {}
+  }
+}
