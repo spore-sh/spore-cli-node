@@ -1,5 +1,9 @@
 {
   "name": "spore-cli",
   "id": "1009e7e5-0c99-4c54-bd13-28e84026165b",
-  "envs": {}
+  "envs": {
+    "development": {
+      "MONGO_URI": "ab5594a7-eff5-43fd-b463-54db3531a970"
+    }
+  }
 }
