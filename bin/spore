@@ -132,27 +132,22 @@ program
       spore.defaultEnv(function (err, envName) {
         if(err) return error(err);
 
-        app.run(cmds, options.envName || envName, function (err, child) {
+        app.run(cmds, options.envName || envName, function (err, childProc) {
           if(err) return error(err);
 
-          child.stdout.on('data', function (data) {
+          childProc.stdout.on('data', function (data) {
             process.stdout.write(data);
           });
 
-          child.stderr.on('data', function (data) {
+          childProc.stderr.on('data', function (data) {
             process.stderr.write(data);
           });
 
-          child.on('error', function (err) {
+          childProc.on('error', function (err) {
             error(err);
           });
 
-          child.on('close', function (code) {
-            if(code === 0) {
-              info(cmd + " exited with code " + code);
-            } else {
-              error(new Error(cmd + " exited with code " + code));
-            }
+          childProc.on('close', function (code) {
             process.exit(0);
           });
         });
