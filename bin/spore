@@ -83,15 +83,13 @@ program
   .option('-a, --app <appName>', "Name of the application")
   .description("Create a new Spore App")
   .action(function (dir, options) {
-    ensureLogin(function () {
-      var appName = options.appName;
-      dir = resolvePath(process.cwd(), dir || ".");
+    var appName = options.appName;
+    dir = resolvePath(process.cwd(), dir || ".");
 
-      spore.createApp(dir, appName, function (err, app) {
-        if(err) return error(err);
+    spore.createApp(dir, appName, function (err, app) {
+      if(err) return error(err);
 
-        info(app.name + " created.");
-      });
+      info(app.name + " created.");
     });
   });
 
