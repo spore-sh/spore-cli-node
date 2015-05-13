@@ -1,18 +1,15 @@
 {
   "name": "spore-cli",
-  "id": "d30b14ab-2085-406c-9a4d-5b02ddaee157",
+  "id": "51655d47-b270-4d6d-8eae-8c63840b15b8",
   "envs": {
     "development": {
-      "MONGO_URI": "a50a74de-2306-462f-9c3a-9aa04c57a40b",
-      "APP_NAME": "7df73b1e-cf56-4d70-8e8e-078f2a37589e"
+      "APP_NAME": "8e00a2c2-9256-49e8-8c86-14bd36ceed3e"
     },
     "staging": {
-      "MONGO_URI": "9691ba21-9b8f-4746-bf60-9065e44c40d4",
-      "APP_NAME": "9a3401b6-973e-406c-b51d-6593da0ea7fd"
+      "APP_NAME": "02aabb77-ae3c-440b-8423-95926dc5d6e3"
     },
     "production": {
-      "MONGO_URI": "cfdcd912-ee42-44a9-b807-f495aeb2507a",
-      "APP_NAME": "61d08cdc-2ad0-44a4-b78a-296a0728b262"
+      "APP_NAME": "6f278852-3756-4cab-822b-fc988e980632"
     }
   },
   "__comments": [
