@@ -6,6 +6,7 @@ var program = require('commander'),
     colors = require('colors'),
     spawn = require('child_process').spawn,
     pkg = require('../package.json'),
+    resolvePath = require('../lib/utils/resolve_path'),
     Spore = require('../lib/spore'),
     spore = new Spore();
 
@@ -80,95 +81,41 @@ program
   .command('new [dir]')
   .alias('init [dir]')
   .option('-a, --app <appName>', "Name of the application")
-  .description("Add a new app to Spore")
+  .description("Create a new Spore App")
   .action(function (dir, options) {
     ensureLogin(function () {
       var appName = options.appName;
-      dir = path.resolve(process.cwd(), dir || ".");
+      dir = resolvePath(process.cwd(), dir || ".");
 
-      if(!appName) {
-        appName = spore.lookupName(dir);
-      }
-
-      spore.api.createApp(appName, function (err, app) {
-        if(err.message === "App already exists") {
-          error(err);
-          help("Download your environment variables with `spore checkout`.");
-          return;
-        }
-
+      spore.createApp(dir, appName, function (err, app) {
         if(err) return error(err);
 
-        spore.writeDotSpore(app.name, dir, function (err) {
-          if(err) return error(err);
-
-          info(app.name + " created.");
-        });
+        info(app.name + " created.");
       });
     });
   });
 
 program
-  .command('checkout [dir]')
-  .option('-a, --app <appName>', "Name of the application")
+  .command('set [key]')
+  .option('-d, --directory <directory>', "Directory in which contains the Spore")
   .option('-e, --env <envName>', "Name of the environment")
-  .description("Download a local copy of your environment variables")
-  .action(function (dir, options) {
-    ensureLogin(function () {
-      dir = path.resolve(process.cwd(), dir || ".");
+  .description("Set an environment variable for a Spore app")
+  .action(function (key, options) {
 
-      spore.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
+    spore.loadApp(resolvePath(process.cwd(), options.directory || '.'), function (err, app) {
+      if(err) return error(err);
+
+      spore.defaultEnv(function (err, envName) {
         if(err) return error(err);
 
-        spore.writeDotSpore(appName, envName, dir, function (err) {
+        envName = options.envName || envName;
+
+        var value = readline.question(key + "=".prompt);
+
+        app.set(envName, key, value, function (err) {
           if(err) return error(err);
 
-          info("Environment variables for " + appName + "/" + envName + " checked out.");
-        });
-      });
-    });
-  });
-
-program
-  .command('set [KEY=value]')
-  .option('-d, --directory <directory>', "Directory in which to look for a .spore file")
-  .option('-a, --app <appName>', "Name of the application")
-  .option('-e, --env <envName>', "Name of the environment")
-  .description("Set an environment variable")
-  .action(function (set, options) {
-    if(set.indexOf('=') === -1) {
-      return error(new Error("A set operation should be of the form ENV_VARIABLE=value"));
-    }
-    ensureLogin(function () {
-      var key,
-          value,
-          dir = path.resolve(process.cwd(), options.directory || ".");
-
-      key = set.substring(0, set.indexOf('='));
-      value = set.substring(set.indexOf('=') + 1);
-
-      spore.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
-        if(err) return error(err);
-
-        spore.api.set(appName, envName, key, value, function (err) {
-          if(err) return error(err);
-
-          info("`" + key + "` updated to `" + value + "` for " + appName + "/" + envName + ".");
-
-          // only write the dot-spore back to this directory
-          // if it's the right app and environment
-          // (i.e. they weren't setting a variable for a different app)
-          spore.getAppAndEnv(dir, null, null, function (err, defaultApp, defaultEnv) {
-            if(err) return error(err);
-
-            if(defaultApp === appName && defaultEnv === envName) {
-              spore.writeDotSpore(appName, envName, dir, function (err) {
-                info("local environment variables updated.");
-              });
-            } else {
-              help("`" + key + "` was not updated locally because the local app/environment of " + defaultApp + "/" + defaultEnv + " didn't match the one you set.");
-            }
-          });
+          info(key + " set for " + app.name + "/" + envName);
         });
       });
     });
@@ -177,33 +124,18 @@ program
 program
   .command('run [commands...]')
   .alias('exec [commands...]')
-  .option('-d, --directory <directory>', "Directory in which to look for a .spore file")
-  .option('-a, --app <appName>', "Name of the application")
+  .option('-d, --directory <directory>', "Directory in which contains the Spore")
   .option('-e, --env <envName>', "Name of the environment")
   .description("Run a command with Spore environment variables loaded")
   .action(function (cmds, options) {
-    ensureLogin(function () {
-      var dir = path.resolve(process.cwd(), options.directory || ".");
+    spore.loadApp(resolvePath(process.cwd(), options.directory || '.'), function (err, app) {
+      if(err) return error(err);
 
-      spore.getAppAndEnv(dir, options.appName, options.envName, function (err, appName, envName) {
+      spore.defaultEnv(function (err, envName) {
         if(err) return error(err);
 
-        // TODO
-        // Fallback to a local .spore so this command can run offline
-        spore.getDotSpore(appName, envName, function (err, env) {
+        app.run(cmds, options.envName || envName, function (err, child) {
           if(err) return error(err);
-
-          // use the current environment for defaults
-          for(var p in process.env) {
-            if(env[p] === undefined) {
-              env[p] = process.env[p];
-            }
-          }
-
-          var cmd = cmds.shift(),
-              args = cmds;
-
-          var child = spawn(cmd, args, { env: env });
 
           child.stdout.on('data', function (data) {
             process.stdout.write(data);
