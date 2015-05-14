@@ -3,13 +3,13 @@
   "id": "2143b6d6-3d25-4f13-bddf-2543fbcb7f0e",
   "envs": {
     "development": {
-      "APP_NAME": "3a6d0f20-f0de-4bc7-8d6e-8c781731a5a2"
+      "APP_NAME": "cff288db-9ae3-4382-adba-c6b37ed76d2f"
     },
     "staging": {
-      "APP_NAME": "97ed896d-d4bf-4026-852b-e9531d942b23"
+      "APP_NAME": "3ad09553-3f9d-4596-b3c0-2ed06a557b13"
     },
     "production": {
-      "APP_NAME": "7c1192be-27ab-412a-aa99-590be0f6f866"
+      "APP_NAME": "e514239b-3636-4ba9-894c-83d0948a3aba"
     }
   },
   "__comments": [

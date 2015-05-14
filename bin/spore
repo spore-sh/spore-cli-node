@@ -61,17 +61,47 @@ program
 
 program
   .command('init [dir]')
-  .option('-a, --app <appName>', "Name of the application")
-  .description("Set up Spore for an application")
+  .option('-n, --name <applicationName>', "Name of the application")
+  .description("Create a new Spore")
   .action(function (dir, options) {
-    var appName = options.appName;
+    var name = options.name;
     dir = resolvePath(process.cwd(), dir || ".");
 
-    spore.createApp(dir, appName, function (err, app) {
+    spore.createApp(dir, name, function (err, app) {
       if(err) return error(err);
 
       info(app.name + " created.");
     });
+  });
+
+program
+  .command('grant [email]')
+  .option('-d, --directory <directory>', "Directory which contains the Spore")
+  .option('-e, --env <environmentName>', "Name of environment to grant permissions for")
+  .option('-a, --all', "Grant read access for all environments of this Spore")
+  .description("Grant read permissions to a user for a Spore")
+  .action(function (email, options) {
+    throw new Error("Not implemented");
+  });
+
+program
+  .command('revoke [email]')
+  .option('-d, --directory <directory>', "Directory which contains the Spore")
+  .option('-e, --env <environmentName>', "Name of environment to revoke permissions for")
+  .option('-a, --all', "Revoke read access for all environments of this Spore")
+  .description("Revoke read permissions from a user for a Spore")
+  .action(function (email, options) {
+    throw new Error("Not implemented");
+  });
+
+program
+  .command('users')
+  .option('-d, --directory <directory>', "Directory which contains the Spore")
+  .option('-e, --env <environmentName>', "Name of environment to view users for")
+  .option('-a, --all', "View users for all environments of the Spore")
+  .description("List the users with read access for a Spore")
+  .action(function (options) {
+    throw new Error("Not implemented");
   });
 
 program
@@ -80,7 +110,7 @@ program
   .option('-e, --env <environmentName>', "Name of environment to set the key for")
   .option('-p, --prompt', "Prompt to set the key for every environment")
   .option('-a, --all', "Set this key to the same value for all environments")
-  .description("Set an environment variable for a Spore app")
+  .description("Set an environment variable for a Spore")
   .action(function (key, options) {
     loadApp(options.directory, function (app) {
 
@@ -153,7 +183,7 @@ program
   .option('-d, --directory <directory>', "Directory which contains the Spore")
   .option('-e, --env <environmentName>', "Name of the environment to get the key from")
   .option('-a, --all', "Get a key's value for all environments")
-  .description("Get environment variable(s) for a Spore app")
+  .description("Get environment variable(s) for a Spore")
   .action(function (key, options) {
     loadApp(options.directory, function (app) {
 
