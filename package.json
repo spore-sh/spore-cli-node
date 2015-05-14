@@ -21,6 +21,7 @@
     "netrc-rw": "0.0.1",
     "node-uuid": "^1.4.3",
     "readline-sync": "^1.2.14",
-    "spore-api": "git+ssh://git@github.com:Teleborder/spore-api-node.git"
+    "spore-api": "git+ssh://git@github.com:Teleborder/spore-api-node.git",
+    "touch": "0.0.3"
   }
 }
