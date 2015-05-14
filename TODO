@@ -1,3 +1,19 @@
+first to register app == owner
+
+anyone (with an account on the pod) can create cells
+
+owner can grant read permissions to environments to other users
+if they don't have an account, send an email
+email should link to auto-generated install script with invite code
+
+for invites to existing users maybe email, but no action required
+
+can't list apps
+
+can list users who have read access on app/env
+
+
+
 hash the .spore file and store it in version control
 - show all environments in one file
 - show all keys, hash the values (uid (3-4 characters?))

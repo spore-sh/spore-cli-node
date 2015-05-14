@@ -4,7 +4,7 @@ var program = require('commander'),
     path = require('path'),
     readline = require('readline-sync'),
     colors = require('colors'),
-    spawn = require('child_process').spawn,
+    async = require('async'),
     pkg = require('../package.json'),
     resolvePath = require('../lib/utils/resolve_path'),
     Spore = require('../lib/spore'),
@@ -60,28 +60,9 @@ program
   });
 
 program
-  .command('apps')
-  .description("List all the apps you have access to")
-  .action(function () {
-    ensureLogin(function () {
-      spore.api.listApps(function (err, apps) {
-        if(err) return error(err);
-
-        if(apps.length) {
-          info(apps.join("\n"));
-        } else {
-          warn("No Apps found.");
-          help("Create a new app with `spore new`.");
-        }
-      });
-    });
-  });
-
-program
-  .command('new [dir]')
-  .alias('init [dir]')
+  .command('init [dir]')
   .option('-a, --app <appName>', "Name of the application")
-  .description("Create a new Spore App")
+  .description("Set up Spore for an application")
   .action(function (dir, options) {
     var appName = options.appName;
     dir = resolvePath(process.cwd(), dir || ".");
@@ -95,130 +76,131 @@ program
 
 program
   .command('set [key]')
-  .option('-d, --directory <directory>', "Directory in which contains the Spore")
-  .option('-e, --env <envName>', "Name of the environment")
+  .option('-d, --directory <directory>', "Directory which contains the Spore")
+  .option('-e, --env <environmentName>', "Name of environment to set the key for")
+  .option('-p, --prompt', "Prompt to set the key for every environment")
+  .option('-a, --all', "Set this key to the same value for all environments")
   .description("Set an environment variable for a Spore app")
   .action(function (key, options) {
+    loadApp(options.directory, function (app) {
 
-    spore.loadApp(resolvePath(process.cwd(), options.directory || '.'), function (err, app) {
-      if(err) return error(err);
+      var value;
 
-      spore.defaultEnv(function (err, envName) {
-        if(err) return error(err);
+      if(options.env) {
+        return setForEnv(app, options.env, key);
+      }
 
-        envName = options.env || envName;
+      if(options.all) {
 
-        var value = readline.question(key + "=".prompt);
-
-        app.set(envName, key, value, function (err) {
-          if(err) return error(err);
-
-          info(key + " set for " + app.name + "/" + envName);
-        });
-      });
-    });
-  });
-
-program
-  .command('set-all [key]')
-  .option('-d, --directory <directory>', "Directory in which contains the Spore")
-  .description("Set an environment variable for all environments of a Spore app")
-  .action(function (key, options) {
-
-    spore.loadApp(resolvePath(process.cwd(), options.directory || '.'), function (err, app) {
-      if(err) return error(err);
-        var value = readline.question(key + "=".prompt);
-
-      app.setAll(key, value, function (err) {
-        if(err) return error(err);
-
-        info(key + " set for " + app.name + "/" + app.envs.map(function (env) {
+        var envNames = app.envs.map(function (env) {
           return env.name;
-        }));
-      });
-    });
-  });
+        }).join();
 
-program
-  .command('get [key]')
-  .option('-d, --directory <directory>', "Directory in which contains the Spore")
-  .option('-e, --env <environmentName>', "Name of the environment")
-  .description("Get environment variable(s) for a Spore app")
-  .action(function (key, options) {
+        console.log((envNames + ":").prompt);
+        
+        value = readline.question(("  " + key + "=").prompt);
 
-    spore.loadApp(resolvePath(process.cwd(), options.directory || '.'), function (err, app) {
-      if(err) return error(err);
-
-      spore.defaultEnv(function (err, envName) {
-        if(err) return error(err);
-
-        envName = options.env || envName;
-
-        if(key) {
-          app.get(envName, key, function (err, val) {
-            if(err) return error(err);
-
-            log(envName + ":");
-            printKv(key, val, 2);
-          });
-          return;
-        }
-
-        app.get(envName, function (err, kv) {
+        app.setAll(key, value, function (err) {
           if(err) return error(err);
 
-          log(envName + ":");
-          printKvs(kv, 2);
-        });
-      });
-    });
-  });
-
-program
-  .command('get-all [key]')
-  .option('-d, --directory <directory>', "Directory in which contains the Spore")
-  .description("Get environment variable(s) for all environments of a Spore app")
-  .action(function (key, options) {
-
-    spore.loadApp(resolvePath(process.cwd(), options.directory || '.'), function (err, app) {
-      if(err) return error(err);
-
-      if(key) {
-        app.getAll(key, function (err, envs) {
-          if(err) return error(err);
-
-          Object.keys(envs).forEach(function (envName) {
-            log(envName + ":");
-
-            printKv(key, envs[envName], 2);
-          });
+          info(key + " set for " + app.name + "/" + envNames);
         });
 
         return;
       }
 
-      app.getAll(function (err, envs) {
+      if(options.prompt) {
+
+        async.each(app.envs, function (env, next) {
+          console.log((env.name + ":").prompt);
+
+          var value = readline.question(("  " + key + "=").prompt);
+
+          app.set(env.name, key, value, next);
+        }, function (err) {
+          if(err) return error(err);
+
+          info(key + " set for " + app.name + "/" + app.envs.map(function (env) {
+            return env.name;
+          }));
+        });
+
+        return;
+      }
+
+      spore.defaultEnv(function (err, envName) {
         if(err) return error(err);
 
-        Object.keys(envs).forEach(function (envName) {
-          log(envName + ":");
-
-          printKvs(envs[envName], 2);
-        });
+        setForEnv(app, envName, key);
       });
     });
   });
 
+function setForEnv(app, envName, key) {
+  console.log((envName + ":").prompt);
+  
+  value = readline.question(("  " + key + "=").prompt);
+
+  app.set(envName, key, value, function (err) {
+    if(err) return error(err);
+
+    info(key + " set for " + app.name + "/" + envName);
+  });
+}
+
+program
+  .command('get [key]')
+  .option('-d, --directory <directory>', "Directory which contains the Spore")
+  .option('-e, --env <environmentName>', "Name of the environment to get the key from")
+  .option('-a, --all', "Get a key's value for all environments")
+  .description("Get environment variable(s) for a Spore app")
+  .action(function (key, options) {
+    loadApp(options.directory, function (app) {
+
+      if(options.env) return getForEnv(app, options.env, key);
+
+      if(options.all) {
+        app.envs.forEach(function (env) {
+          getForEnv(app, env.name, key);
+        });
+        return;
+      }
+
+      spore.defaultEnv(function (err, envName) {
+        if(err) return error(err);
+
+        getForEnv(app, envName, key);
+      });
+    });
+  });
+
+function getForEnv(app, envName, key) {
+  if(key) {
+    app.get(envName, key, function (err, val) {
+      if(err) return error(err);
+
+      log(envName + ":");
+      printKv(key, val, 2);
+    });
+    return;
+  }
+
+  app.get(envName, function (err, kv) {
+    if(err) return error(err);
+
+    log(envName + ":");
+    printKvs(kv, 2);
+  });
+}
 
 program
   .command('run [commands...]')
-  .alias('exec [commands...]')
+  .alias('exec')
   .option('-d, --directory <directory>', "Directory in which contains the Spore")
   .option('-e, --env <envName>', "Name of the environment")
   .description("Run a command with Spore environment variables loaded")
   .action(function (cmds, options) {
-    spore.loadApp(resolvePath(process.cwd(), options.directory || '.'), function (err, app) {
-      if(err) return error(err);
+    loadApp(options.directory, function (app) {
 
       spore.defaultEnv(function (err, envName) {
         if(err) return error(err);
@@ -245,6 +227,14 @@ program
       });
     });
   });
+
+function loadApp(dir, callback) {
+  spore.loadApp(resolvePath(process.cwd(), dir || '.'), function (err, app) {
+    if(err) return error(err);
+
+    callback(app);
+  });
+}
 
 function ensureLogin(callback) {
   if(spore.getKey()) {
