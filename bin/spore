@@ -25,6 +25,18 @@ colors.setTheme({
 
 process.title = program._name = "spore";
 
+spore.on('sync', function () {
+  info("Network connection detected, syncing offline activity...");
+});
+
+spore.on('syncError', function (err) {
+  error(err);
+});
+
+spore.on('syncComplete', function () {
+  info("Sync complete.");
+});
+
 program
   .version(pkg.version);
 
