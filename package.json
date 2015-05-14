@@ -22,6 +22,8 @@
     "node-uuid": "^1.4.3",
     "readline-sync": "^1.2.14",
     "spore-api": "git+ssh://git@github.com:Teleborder/spore-api-node.git",
+    "spore-cell-parse": "0.0.1",
+    "spore-errors": "0.0.1",
     "touch": "0.0.3"
   }
 }
