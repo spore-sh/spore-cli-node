@@ -106,7 +106,7 @@ program
       spore.defaultEnv(function (err, envName) {
         if(err) return error(err);
 
-        envName = options.envName || envName;
+        envName = options.env || envName;
 
         var value = readline.question(key + "=".prompt);
 
@@ -142,7 +142,7 @@ program
 program
   .command('get [key]')
   .option('-d, --directory <directory>', "Directory in which contains the Spore")
-  .option('-e, --env <envName>', "Name of the environment")
+  .option('-e, --env <environmentName>', "Name of the environment")
   .description("Get environment variable(s) for a Spore app")
   .action(function (key, options) {
 
@@ -152,13 +152,14 @@ program
       spore.defaultEnv(function (err, envName) {
         if(err) return error(err);
 
-        envName = options.envName || envName;
+        envName = options.env || envName;
 
         if(key) {
           app.get(envName, key, function (err, val) {
             if(err) return error(err);
 
-            printKv(key, val);
+            log(envName + ":");
+            printKv(key, val, 2);
           });
           return;
         }
@@ -166,7 +167,8 @@ program
         app.get(envName, function (err, kv) {
           if(err) return error(err);
 
-          printKvs(kv);
+          log(envName + ":");
+          printKvs(kv, 2);
         });
       });
     });
@@ -188,17 +190,21 @@ program
           Object.keys(envs).forEach(function (envName) {
             log(envName + ":");
 
-            printKvs(envs[envName], 2);
+            printKv(key, envs[envName], 2);
           });
         });
 
         return;
       }
 
-      app.getAll(function (err, kv) {
+      app.getAll(function (err, envs) {
         if(err) return error(err);
 
-        printKvs(kv);
+        Object.keys(envs).forEach(function (envName) {
+          log(envName + ":");
+
+          printKvs(envs[envName], 2);
+        });
       });
     });
   });
@@ -217,7 +223,7 @@ program
       spore.defaultEnv(function (err, envName) {
         if(err) return error(err);
 
-        app.run(cmds, options.envName || envName, function (err, childProc) {
+        app.run(cmds, options.env || envName, function (err, childProc) {
           if(err) return error(err);
 
           childProc.stdout.on('data', function (data) {
@@ -269,7 +275,7 @@ function printKvs(kv, tabs) {
 
 function printKv(key, value, tabs) {
   tabs = tabs || 0;
-  log(new Array(tabs + 1).join(' ').split('') + key + "=" + value);
+  log(new Array(tabs + 1).join(' ') + key + "=" + value);
 }
 
 function log(message) {

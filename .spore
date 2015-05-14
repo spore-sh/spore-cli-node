@@ -1,15 +1,15 @@
 {
   "name": "spore-cli",
-  "id": "51655d47-b270-4d6d-8eae-8c63840b15b8",
+  "id": "2143b6d6-3d25-4f13-bddf-2543fbcb7f0e",
   "envs": {
     "development": {
-      "APP_NAME": "8e00a2c2-9256-49e8-8c86-14bd36ceed3e"
+      "APP_NAME": "3a6d0f20-f0de-4bc7-8d6e-8c781731a5a2"
     },
     "staging": {
-      "APP_NAME": "02aabb77-ae3c-440b-8423-95926dc5d6e3"
+      "APP_NAME": "97ed896d-d4bf-4026-852b-e9531d942b23"
     },
     "production": {
-      "APP_NAME": "6f278852-3756-4cab-822b-fc988e980632"
+      "APP_NAME": "7c1192be-27ab-412a-aa99-590be0f6f866"
     }
   },
   "__comments": [
