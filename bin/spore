@@ -81,8 +81,39 @@ program
   .option('-a, --all', "Grant read access for all environments of this Spore")
   .description("Grant read permissions to a user for a Spore")
   .action(function (email, options) {
-    throw new Error("Not implemented");
+    loadApp(options.directory, function (app) {
+
+      if(options.env) {
+        app.grant(options.env, email, accessGranted(email, app.fullName() + "/" + options.env));
+
+        return;
+      }
+
+      if(options.all) {
+        app.grantAll(
+          email,
+          accessGranted(email, app.fullName() + "/" + app.envs.map(function (env) {
+            return env.name;
+          }))
+        );
+
+        return;
+      }
+
+      spore.defaultEnv(function (err, envName) {
+        if(err) return error(err);
+
+        app.grant(envName, email, accessGranted(email, app.fullName() + "/" + envName));
+      });
+    });
   });
+
+function accessGranted(email, name) {
+  return function (err) {
+    if(err) return error(err);
+    info("Read access to " + name + " granted for " + email);
+  };
+}
 
 program
   .command('revoke [email]')
@@ -91,8 +122,39 @@ program
   .option('-a, --all', "Revoke read access for all environments of this Spore")
   .description("Revoke read permissions from a user for a Spore")
   .action(function (email, options) {
-    throw new Error("Not implemented");
+    loadApp(options.directory, function (app) {
+
+      if(options.env) {
+        app.revoke(options.env, email, accessRevoked(email, app.fullName() + "/" + options.env));
+
+        return;
+      }
+
+      if(options.all) {
+        app.revokeAll(
+          email,
+          accessRevoked(email, app.fullName() + "/" + app.envs.map(function (env) {
+            return env.name;
+          }))
+        );
+
+        return;
+      }
+
+      spore.defaultEnv(function (err, envName) {
+        if(err) return error(err);
+
+        app.revoke(envName, email, accessRevoked(email, app.fullName() + "/" + envName));
+      });
+    });
   });
+
+function accessRevoked(email, name) {
+  return function (err) {
+    if(err) return error(err);
+    info("Read access to " + name + " revoked for " + email);
+  };
+}
 
 program
   .command('users')
@@ -101,8 +163,51 @@ program
   .option('-a, --all', "View users for all environments of the Spore")
   .description("List the users with read access for a Spore")
   .action(function (options) {
-    throw new Error("Not implemented");
+    loadApp(options.directory, function (app) {
+
+      if(options.env) {
+        app.users(options.env, function (err, users) {
+          if(err) return error(err);
+
+          printUsers(options.env, users);
+        });
+
+        return;
+      }
+
+      if(options.all) {
+        app.allUsers(function (err, allUsers) {
+          if(err) return error(err);
+
+          printAllUsers(allUsers);
+        });
+
+        return;
+      }
+
+      spore.defaultEnv(function (err, envName) {
+        if(err) return error(err);
+
+        app.users(envName, function (err, users) {
+          if(err) return error(err);
+
+          printUsers(envName, users);
+        });
+      });
+    });
   });
+
+function printAllUsers(allUsers) {
+  Object.keys(allUsers).forEach(function (envName) {
+    printUsers(envName, allUsers[envName]);
+  });
+}
+
+function printUsers(envName, users) {
+  log(envName + ":");
+
+  log("  " + users.join("\n  "));
+}
 
 program
   .command('set [key]')
@@ -223,6 +328,17 @@ function getForEnv(app, envName, key) {
   });
 }
 
+function printKvs(kv, tabs) {
+  Object.keys(kv).forEach(function (key) {
+    printKv(key, kv[key], tabs);
+  });
+}
+
+function printKv(key, value, tabs) {
+  tabs = tabs || 0;
+  log(new Array(tabs + 1).join(' ') + key + "=" + value);
+}
+
 program
   .command('run [commands...]')
   .alias('exec')
@@ -285,17 +401,6 @@ function login(email, password, callback) {
 
     callback(null, user);
   });
-}
-
-function printKvs(kv, tabs) {
-  Object.keys(kv).forEach(function (key) {
-    printKv(key, kv[key], tabs);
-  });
-}
-
-function printKv(key, value, tabs) {
-  tabs = tabs || 0;
-  log(new Array(tabs + 1).join(' ') + key + "=" + value);
 }
 
 function log(message) {
