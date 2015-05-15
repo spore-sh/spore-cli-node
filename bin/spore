@@ -74,11 +74,11 @@ program
 
 program
   .command('init [dir]')
-  .option('-n, --name <applicationName>', "Name of the application")
+  .option('-n, --app-name <applicationName>', "Name of the application")
   .description("Create a new Spore")
   .action(function (dir, options) {
     ensureLogin(function () {
-      var name = options.name;
+      var name = options['app-name'];
       dir = resolvePath(process.cwd(), dir || ".");
 
       spore.createApp(dir, name, function (err, app) {
@@ -92,14 +92,14 @@ program
 program
   .command('grant [email]')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
-  .option('-e, --env <environmentName>', "Name of environment to grant permissions for")
+  .option('-e, --environment <name>', "Name of environment to grant permissions for")
   .option('-a, --all', "Grant read access for all environments of this Spore")
   .description("Grant read permissions to a user for a Spore")
   .action(function (email, options) {
     loadApp(options.directory, function (app) {
 
-      if(options.env) {
-        app.grant(options.env, email, accessGranted(email, app.fullName() + "/" + options.env));
+      if(options.environment) {
+        app.grant(options.environment, email, accessGranted(email, app.fullName() + "/" + options.environment));
 
         return;
       }
@@ -133,14 +133,14 @@ function accessGranted(email, name) {
 program
   .command('revoke [email]')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
-  .option('-e, --env <environmentName>', "Name of environment to revoke permissions for")
+  .option('-e, --environment <name>', "Name of environment to revoke permissions for")
   .option('-a, --all', "Revoke read access for all environments of this Spore")
   .description("Revoke read permissions from a user for a Spore")
   .action(function (email, options) {
     loadApp(options.directory, function (app) {
 
-      if(options.env) {
-        app.revoke(options.env, email, accessRevoked(email, app.fullName() + "/" + options.env));
+      if(options.environment) {
+        app.revoke(options.environment, email, accessRevoked(email, app.fullName() + "/" + options.environment));
 
         return;
       }
@@ -174,17 +174,17 @@ function accessRevoked(email, name) {
 program
   .command('users')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
-  .option('-e, --env <environmentName>', "Name of environment to view users for")
+  .option('-e, --environment <name>', "Name of environment to view users for")
   .option('-a, --all', "View users for all environments of the Spore")
   .description("List the users with read access for a Spore")
   .action(function (options) {
     loadApp(options.directory, function (app) {
 
-      if(options.env) {
-        app.users(options.env, function (err, users) {
+      if(options.environment) {
+        app.users(options.environment, function (err, users) {
           if(err) return error(err);
 
-          printUsers(options.env, users);
+          printUsers(options.environment, users);
         });
 
         return;
@@ -227,7 +227,7 @@ function printUsers(envName, users) {
 program
   .command('set [key]')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
-  .option('-e, --env <environmentName>', "Name of environment to set the key for")
+  .option('-e, --environment <name>', "Name of environment to set the key for")
   .option('-p, --prompt', "Prompt to set the key for every environment")
   .option('-a, --all', "Set this key to the same value for all environments")
   .description("Set an environment variable for a Spore")
@@ -236,8 +236,8 @@ program
 
       var value;
 
-      if(options.env) {
-        return setForEnv(app, options.env, key);
+      if(options.environment) {
+        return setForEnv(app, options.environment, key);
       }
 
       if(options.all) {
@@ -301,13 +301,13 @@ function setForEnv(app, envName, key) {
 program
   .command('get [key]')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
-  .option('-e, --env <environmentName>', "Name of the environment to get the key from")
+  .option('-e, --environment <name>', "Name of the environment to get the key from")
   .option('-a, --all', "Get a key's value for all environments")
   .description("Get environment variable(s) for a Spore")
   .action(function (key, options) {
     loadApp(options.directory, function (app) {
 
-      if(options.env) return getForEnv(app, options.env, key);
+      if(options.environment) return getForEnv(app, options.environment, key);
 
       if(options.all) {
         app.envs.forEach(function (env) {
@@ -358,7 +358,7 @@ program
   .command('run [commands...]')
   .alias('exec')
   .option('-d, --directory <directory>', "Directory in which contains the Spore")
-  .option('-e, --env <envName>', "Name of the environment")
+  .option('-e, --environment <envName>', "Name of the environment")
   .description("Run a command with Spore environment variables loaded")
   .action(function (cmds, options) {
     loadApp(options.directory, function (app) {
@@ -366,7 +366,7 @@ program
       spore.defaultEnv(function (err, envName) {
         if(err) return error(err);
 
-        app.run(cmds, options.env || envName, function (err, childProc) {
+        app.run(cmds, options.environment || envName, function (err, childProc) {
           if(err) return error(err);
 
           childProc.stdout.on('data', function (data) {
