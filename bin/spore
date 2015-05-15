@@ -404,7 +404,7 @@ function ensureLogin(callback) {
     if(err) return error(err);
 
     if(user) {
-      return callback();
+      return callback(user);
     }
 
     log("You need to log into your Spore Pod.");
@@ -423,7 +423,7 @@ function login(email, password, callback) {
   spore.login(email, password, function (err, user) {
     if(err) return error(err);
 
-    callback();
+    callback(user);
   });
 }
 
@@ -433,6 +433,8 @@ function log(message) {
 
 function error(err) {
   console.error(err.message.error);
+  console.log(err);
+  console.log(err.stack);
 }
 
 function info(message) {

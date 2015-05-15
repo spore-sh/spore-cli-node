@@ -1,6 +1,6 @@
 {
   "name": "spore-cli",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "CLI for Spore",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -18,7 +18,7 @@
     "debug": "^2.2.0",
     "fs-extra": "^0.18.3",
     "merge": "^1.2.0",
-    "netrc-rw": "0.0.1",
+    "netrc-rw": "0.1.0",
     "node-uuid": "^1.4.3",
     "readline-sync": "^1.2.14",
     "spore-api": "git+ssh://git@github.com:Teleborder/spore-api-node.git",
