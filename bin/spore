@@ -44,7 +44,7 @@ program
   .command('signup')
   .option("-e, --email <email>", "Email to sign up with")
   .option("-p, --password <password>", "Password to sign up with")
-  .description("Create an Spore account")
+  .description("Create an account on your Spore Pod")
   .action(function (options) {
 
     var email = options.email || readline.question("Email: ".prompt),
@@ -63,10 +63,10 @@ program
   .command('login')
   .option("-e, --email <email>", "Email to log in with")
   .option("-p, --password <password>", "Password to log in with")
-  .description("Log in to your Spore account")
+  .description("Log in to your Spore Pod")
   .action(function (options) {
 
-    login(options.email, options.password, function (_, user) {
+    login(options.email, options.password, function (user) {
       info("Logged in as " + user.email + ".");
     });
   });
@@ -408,10 +408,10 @@ function login(email, password, callback) {
 
   if(!email || !password) return error(new Error("Email and password are required."));
 
-  spore.login(email, password, function (err, user) {
+  spore.login(email, password, function (err, key) {
     if(err) error(err);
 
-    callback(null, user);
+    callback(key);
   });
 }
 
