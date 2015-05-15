@@ -69,6 +69,7 @@ program
     login(options.email, options.password, function (user) {
       info("Logged in as " + user.email + ".");
     });
+
   });
 
 program
@@ -76,13 +77,15 @@ program
   .option('-n, --name <applicationName>', "Name of the application")
   .description("Create a new Spore")
   .action(function (dir, options) {
-    var name = options.name;
-    dir = resolvePath(process.cwd(), dir || ".");
+    ensureLogin(function () {
+      var name = options.name;
+      dir = resolvePath(process.cwd(), dir || ".");
 
-    spore.createApp(dir, name, function (err, app) {
-      if(err) return error(err);
+      spore.createApp(dir, name, function (err, app) {
+        if(err) return error(err);
 
-      info(app.name + " created.");
+        info(app.name + " created.");
+      });
     });
   });
 
@@ -387,19 +390,28 @@ program
   });
 
 function loadApp(dir, callback) {
-  spore.loadApp(resolvePath(process.cwd(), dir || '.'), function (err, app) {
-    if(err) return error(err);
+  ensureLogin(function () {
+    spore.loadApp(resolvePath(process.cwd(), dir || '.'), function (err, app) {
+      if(err) return error(err);
 
-    callback(app);
+      callback(app);
+    });
   });
 }
 
 function ensureLogin(callback) {
-  if(spore.getKey()) {
-    return callback(null, true);
-  }
+  spore.getKey(function (err, user) {
+    if(err) return error(err);
 
-  login(null, null, callback);
+    if(user) {
+      return callback();
+    }
+
+    log("You need to log into your Spore Pod.");
+    help("Create an account with `spore signup`");
+
+    login(null, null, callback);
+  });
 }
 
 function login(email, password, callback) {
@@ -408,10 +420,10 @@ function login(email, password, callback) {
 
   if(!email || !password) return error(new Error("Email and password are required."));
 
-  spore.login(email, password, function (err, key) {
-    if(err) error(err);
+  spore.login(email, password, function (err, user) {
+    if(err) return error(err);
 
-    callback(key);
+    callback();
   });
 }
 
