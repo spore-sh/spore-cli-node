@@ -90,7 +90,7 @@ program
   });
 
 program
-  .command('grant [email]')
+  .command('grant <email>')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
   .option('-e, --environment <name>', "Name of environment to grant permissions for")
   .option('-a, --all', "Grant read access for all environments of this Spore")
@@ -131,7 +131,7 @@ function accessGranted(email, name) {
 }
 
 program
-  .command('revoke [email]')
+  .command('revoke <email>')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
   .option('-e, --environment <name>', "Name of environment to revoke permissions for")
   .option('-a, --all', "Revoke read access for all environments of this Spore")
@@ -225,7 +225,7 @@ function printUsers(envName, users) {
 }
 
 program
-  .command('set [key]')
+  .command('set <key>')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
   .option('-e, --environment <name>', "Name of environment to set the key for")
   .option('-p, --prompt', "Prompt to set the key for every environment")
@@ -355,7 +355,7 @@ function printKv(key, value, tabs) {
 }
 
 program
-  .command('run [commands...]')
+  .command('run <commands...>')
   .alias('exec')
   .option('-d, --directory <directory>', "Directory in which contains the Spore")
   .option('-e, --environment <envName>', "Name of the environment")
