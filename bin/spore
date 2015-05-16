@@ -7,6 +7,7 @@ var program = require('commander'),
     async = require('async'),
     pkg = require('../package.json'),
     resolvePath = require('../lib/utils/resolve_path'),
+    Errors = require('spore-errors'),
     Spore = require('../lib/spore'),
     spore = new Spore();
 
@@ -76,10 +77,12 @@ program
   .command('verify <token>')
   .description("Verify your email address")
   .action(function (token) {
-    spore.verify(token, function (err, user) {
-      if(err) return error(err);
+    ensureLogin(function () {
+      spore.verify(token, function (err, user) {
+        if(err) return error(err);
 
-      info(user.email + " has been verified");
+        info(user.email + " has been verified");
+      });
     });
   });
 
@@ -457,6 +460,9 @@ function log(message) {
 
 function error(err) {
   console.error(err.message.error);
+  if(Errors.noAppFound.test(err)) {
+    help("Make sure you're in your app's root, or create a new Spore with `spore init`");
+  }
   console.log(err);
   console.log(err.stack);
 }
