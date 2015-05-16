@@ -73,6 +73,17 @@ program
   });
 
 program
+  .command('verify <token>')
+  .description("Verify your email address")
+  .action(function (token) {
+    spore.verify(token, function (err, user) {
+      if(err) return error(err);
+
+      info(user.email + " has been verified");
+    });
+  });
+
+program
   .command('init [dir]')
   .option('-n, --app-name <applicationName>', "Name of the application")
   .description("Create a new Spore")
@@ -129,6 +140,19 @@ function accessGranted(email, name) {
     info("Read access to " + name + " granted for " + email);
   };
 }
+
+program
+  .command('accept <token>')
+  .description("Accept invitation to collaborate on a Spore")
+  .action(function (token) {
+    ensureLogin(function () {
+      spore.accept(token, function (err, env) {
+        if(err) return error(err);
+
+        info("You now have access to " + env.fullName());
+      });
+    });
+  });
 
 program
   .command('revoke <email>')
