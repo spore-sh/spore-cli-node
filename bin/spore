@@ -42,10 +42,10 @@ program
   .version(pkg.version);
 
 program
-  .command('signup')
+  .command('account:signup')
   .option("-e, --email <email>", "Email to sign up with")
   .option("-p, --password <password>", "Password to sign up with")
-  .description("Create an account on your Spore Pod")
+  .description("Create an account on the Spore Pod")
   .action(function (options) {
 
     var email = options.email || readline.question("Email: ".prompt),
@@ -61,10 +61,10 @@ program
   });
 
 program
-  .command('login')
+  .command('account:login')
   .option("-e, --email <email>", "Email to log in with")
   .option("-p, --password <password>", "Password to log in with")
-  .description("Log in to your Spore Pod")
+  .description("Log in to the Spore Pod")
   .action(function (options) {
 
     login(options.email, options.password, function (user) {
@@ -74,7 +74,7 @@ program
   });
 
 program
-  .command('verify <token>')
+  .command('account:verify <token>')
   .description("Verify your email address")
   .action(function (token) {
     ensureLogin(function () {
@@ -104,7 +104,7 @@ program
   });
 
 program
-  .command('grant <email>')
+  .command('memberships:grant <email>')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
   .option('-e, --environment <name>', "Name of environment to grant permissions for")
   .option('-a, --all', "Grant read access for all environments of this Spore")
@@ -145,7 +145,7 @@ function accessGranted(email, name) {
 }
 
 program
-  .command('accept <token>')
+  .command('memberships:accept <token>')
   .description("Accept invitation to collaborate on a Spore")
   .action(function (token) {
     ensureLogin(function () {
@@ -158,7 +158,7 @@ program
   });
 
 program
-  .command('revoke <email>')
+  .command('memberships:revoke <email>')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
   .option('-e, --environment <name>', "Name of environment to revoke permissions for")
   .option('-a, --all', "Revoke read access for all environments of this Spore")
@@ -199,7 +199,7 @@ function accessRevoked(email, name) {
 }
 
 program
-  .command('users')
+  .command('memberships:list')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
   .option('-e, --environment <name>', "Name of environment to view users for")
   .option('-a, --all', "View users for all environments of the Spore")
@@ -435,7 +435,7 @@ function ensureLogin(callback) {
     }
 
     log("You need to log into your Spore Pod.");
-    help("Create an account with `spore signup`");
+    help("Create an account with `spore account:signup`");
 
     login(null, null, callback);
   });
