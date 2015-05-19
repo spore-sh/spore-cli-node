@@ -252,6 +252,37 @@ function printUsers(envName, users) {
 }
 
 program
+  .command('deployments:create <name>')
+  .option('-d, --directory <directory>', "Directory which contains the Spore")
+  .option('-e, --environment <name>', "Name of environment to create the deployment for")
+  .description("Create a new deployment for a Spore")
+  .action(function (name, options) {
+    loadApp(options.directory, function (app) {
+
+      if(options.environment) {
+        createDeployment(app, options.environment, name);
+        return;
+      }
+
+      spore.defaultEnv(function (err, envName) {
+        if(err) return error(err);
+
+        createDeployment(app, envName, name);
+      });
+    });
+  });
+
+function createDeployment(app, envName, name) {
+  app.findEnv(envName).createDeployment(name, function (err, deployment) {
+    if(err) return error(err);
+
+    info("Deployment `" + name + "` created for " + app.findEnv(envName).fullName());
+    help("Set the environment variable below on your server to have access to your Spore environment");
+    log("SPORE_DEPLOYMENT=" + deployment.exports);
+  });
+}
+
+program
   .command('set <key>')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
   .option('-e, --environment <name>', "Name of environment to set the key for")
@@ -472,7 +503,7 @@ function info(message) {
 }
 
 function help(message) {
-  console.log(message.help);
+  console.info(message.help);
 }
 
 function warn(message) {
