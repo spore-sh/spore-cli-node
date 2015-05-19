@@ -1,6 +1,9 @@
 - have a version of `run` that doesn't save to a cache (for production/staging)
 
 have a special api key for each environment that only maps to that environment (i.e. you don't need to specify the environment)
+// environment variable: user:password@host:port
+user is deployment-name+environment-name+app-uid
+host is pod.spore.sh (most likely)
 
 migrate
 - heroku (set spore key on heroku server)
