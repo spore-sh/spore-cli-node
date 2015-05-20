@@ -1,7 +1,0 @@
-{
-  "host": "https://pod.spore.sh",
-  "sporeFile": ".spore",
-  "netrc": "~/.netrc",
-  "defaultEnv": "development",
-  "defaultEnvs": ["development", "staging", "production"]
-}
