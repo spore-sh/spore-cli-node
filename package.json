@@ -16,12 +16,13 @@
     "colors": "^1.1.0",
     "commander": "^2.8.1",
     "debug": "^2.2.0",
+    "expand-home-dir": "0.0.2",
     "fs-extra": "^0.18.3",
+    "json-comment": "0.0.1",
     "merge": "^1.2.0",
     "node-uuid": "^1.4.3",
     "readline-sync": "^1.2.14",
     "spore": "git+ssh://git@github.com:Teleborder/spore-node.git",
-    "spore-errors": "0.0.1",
-    "expand-home-dir": "0.0.2"
+    "spore-errors": "0.0.1"
   }
 }
