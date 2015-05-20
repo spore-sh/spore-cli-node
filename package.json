@@ -20,7 +20,7 @@
     "merge": "^1.2.0",
     "node-uuid": "^1.4.3",
     "readline-sync": "^1.2.14",
-    "spore": "git+ssh://git@github.com:Teleborder/spore-api-node.git",
+    "spore": "git+ssh://git@github.com:Teleborder/spore-node.git",
     "spore-errors": "0.0.1",
     "expand-home-dir": "0.0.2"
   }
