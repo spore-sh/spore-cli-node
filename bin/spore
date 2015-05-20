@@ -100,12 +100,6 @@ program
   .action(function (email, options) {
     loadApp(options.directory, function (app) {
 
-      if(options.environment) {
-        app.grant(options.environment, email, accessGranted(email, app.fullName() + "/" + options.environment));
-
-        return;
-      }
-
       if(options.all) {
         app.grantAll(
           email,
@@ -117,11 +111,9 @@ program
         return;
       }
 
-      spore.defaultEnv(function (err, envName) {
-        if(err) return error(err);
+      var envName = options.environment || spore.defaultEnv();
 
-        app.grant(envName, email, accessGranted(email, app.fullName() + "/" + envName));
-      });
+      app.grant(envName, email, accessGranted(email, app.fullName() + "/" + envName));
     });
   });
 
@@ -154,12 +146,6 @@ program
   .action(function (email, options) {
     loadApp(options.directory, function (app) {
 
-      if(options.environment) {
-        app.revoke(options.environment, email, accessRevoked(email, app.fullName() + "/" + options.environment));
-
-        return;
-      }
-
       if(options.all) {
         app.revokeAll(
           email,
@@ -171,11 +157,9 @@ program
         return;
       }
 
-      spore.defaultEnv(function (err, envName) {
-        if(err) return error(err);
+      var envName = options.environment || spore.defaultEnv();
 
-        app.revoke(envName, email, accessRevoked(email, app.fullName() + "/" + envName));
-      });
+      app.revoke(envName, email, accessRevoked(email, app.fullName() + "/" + envName));
     });
   });
 
@@ -195,43 +179,25 @@ program
   .action(function (options) {
     loadApp(options.directory, function (app) {
 
-      if(options.environment) {
-        app.users(options.environment, function (err, users) {
-          if(err) return error(err);
-
-          printUsers(options.environment, users);
-        });
-
-        return;
-      }
-
       if(options.all) {
         app.allUsers(function (err, allUsers) {
           if(err) return error(err);
 
-          printAllUsers(allUsers);
+          Object.keys(allUsers).forEach(function (envName) {
+            printUsers(envName, allUsers[envName]);
+          });
         });
 
         return;
       }
 
-      spore.defaultEnv(function (err, envName) {
+      app.users(options.environment || spore.defaultEnv(), function (err, users) {
         if(err) return error(err);
 
-        app.users(envName, function (err, users) {
-          if(err) return error(err);
-
-          printUsers(envName, users);
-        });
+        printUsers(envName, users);
       });
     });
   });
-
-function printAllUsers(allUsers) {
-  Object.keys(allUsers).forEach(function (envName) {
-    printUsers(envName, allUsers[envName]);
-  });
-}
 
 function printUsers(envName, users) {
   log(envName + ":");
@@ -247,27 +213,20 @@ program
   .action(function (name, options) {
     loadApp(options.directory, function (app) {
 
-      if(options.environment) {
-        createDeployment(app, options.environment, name);
-        return;
-      }
+      var envName = options.environment || spore.defaultEnv();
 
-      spore.defaultEnv(function (err, envName) {
+      app.findEnv(envName).createDeployment(name, function (err, deployment) {
         if(err) return error(err);
 
-        createDeployment(app, envName, name);
+        info("Deployment `" + name + "` created for " + app.findEnv(envName).fullName());
+        help("Set the environment variable below on your server to have access to your Spore environment");
+        log("SPORE_DEPLOYMENT=" + deployment.exports);
       });
     });
   });
 
 function createDeployment(app, envName, name) {
-  app.findEnv(envName).createDeployment(name, function (err, deployment) {
-    if(err) return error(err);
 
-    info("Deployment `" + name + "` created for " + app.findEnv(envName).fullName());
-    help("Set the environment variable below on your server to have access to your Spore environment");
-    log("SPORE_DEPLOYMENT=" + deployment.exports);
-  });
 }
 
 program
@@ -281,10 +240,6 @@ program
     loadApp(options.directory, function (app) {
 
       var value;
-
-      if(options.environment) {
-        return setForEnv(app, options.environment, key);
-      }
 
       if(options.all) {
 
@@ -324,11 +279,7 @@ program
         return;
       }
 
-      spore.defaultEnv(function (err, envName) {
-        if(err) return error(err);
-
-        setForEnv(app, envName, key);
-      });
+      setForEnv(app, options.environment || spore.defaultEnv(), key);
     });
   });
 
@@ -353,8 +304,6 @@ program
   .action(function (key, options) {
     loadApp(options.directory, function (app) {
 
-      if(options.environment) return getForEnv(app, options.environment, key);
-
       if(options.all) {
         app.envs.forEach(function (env) {
           getForEnv(app, env.name, key);
@@ -362,11 +311,7 @@ program
         return;
       }
 
-      spore.defaultEnv(function (err, envName) {
-        if(err) return error(err);
-
-        getForEnv(app, envName, key);
-      });
+      getForEnv(app, options.environment || spore.defaultEnv(), key);
     });
   });
 
@@ -409,27 +354,23 @@ program
   .action(function (cmds, options) {
     loadApp(options.directory, function (app) {
 
-      spore.defaultEnv(function (err, envName) {
+      app.run(cmds, options.environment || spore.defaultEnv(), function (err, childProc) {
         if(err) return error(err);
 
-        app.run(cmds, options.environment || envName, function (err, childProc) {
-          if(err) return error(err);
+        childProc.stdout.on('data', function (data) {
+          process.stdout.write(data);
+        });
 
-          childProc.stdout.on('data', function (data) {
-            process.stdout.write(data);
-          });
+        childProc.stderr.on('data', function (data) {
+          process.stderr.write(data);
+        });
 
-          childProc.stderr.on('data', function (data) {
-            process.stderr.write(data);
-          });
+        childProc.on('error', function (err) {
+          error(err);
+        });
 
-          childProc.on('error', function (err) {
-            error(err);
-          });
-
-          childProc.on('close', function (code) {
-            process.exit(0);
-          });
+        childProc.on('close', function (code) {
+          process.exit(0);
         });
       });
     });
@@ -446,18 +387,16 @@ function loadApp(dir, callback) {
 }
 
 function ensureLogin(callback) {
-  spore.getKey(function (err, user) {
-    if(err) return error(err);
+  var user = spore.getKey();
 
-    if(user) {
-      return callback(user);
-    }
+  if(user) {
+    return callback(user);
+  }
 
-    log("You need to log into your Spore Pod.");
-    help("Create an account with `spore account:signup`");
+  log("You need to log into your Spore Pod.");
+  help("Create an account with `spore account:signup`");
 
-    login(null, null, callback);
-  });
+  login(null, null, callback);  
 }
 
 function login(email, password, callback) {
