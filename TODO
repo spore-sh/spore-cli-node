@@ -1,7 +1,3 @@
-local daemon
-  - have a local server that proxies requests to the pod
-  - no proxy in a deployment (assume always on)
-
 versions
   - ruby version of the api
   - rails version of spore
