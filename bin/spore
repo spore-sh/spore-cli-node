@@ -389,7 +389,7 @@ function loadApp(dir, callback) {
 }
 
 function ensureLogin(callback) {
-  var user = spore.getKey();
+  var user = spore.config.getCredentials();
 
   if(user) {
     return callback(user);
