@@ -31,6 +31,7 @@ program
 
 program
   .command('account:signup')
+  .alias('signup')
   .option("-e, --email <email>", "Email to sign up with")
   .option("-p, --password <password>", "Password to sign up with")
   .description("Create an account on the Spore Pod")
@@ -50,6 +51,7 @@ program
 
 program
   .command('account:login')
+  .alias('login')
   .option("-e, --email <email>", "Email to log in with")
   .option("-p, --password <password>", "Password to log in with")
   .description("Log in to the Spore Pod")
@@ -63,6 +65,7 @@ program
 
 program
   .command('account:verify <token>')
+  .alias('verify')
   .description("Verify your email address")
   .action(function (token) {
     ensureLogin(function () {
@@ -93,6 +96,7 @@ program
 
 program
   .command('memberships:grant <email>')
+  .alias('grant')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
   .option('-e, --environment <name>', "Name of environment to grant permissions for")
   .option('-a, --all', "Grant read access for all environments of this Spore")
@@ -126,6 +130,7 @@ function accessGranted(email, name) {
 
 program
   .command('memberships:accept <token>')
+  .alias('accept')
   .description("Accept invitation to collaborate on a Spore")
   .action(function (token) {
     ensureLogin(function () {
@@ -139,6 +144,7 @@ program
 
 program
   .command('memberships:revoke <email>')
+  .alias('revoke')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
   .option('-e, --environment <name>', "Name of environment to revoke permissions for")
   .option('-a, --all', "Revoke read access for all environments of this Spore")
@@ -209,6 +215,7 @@ function printUsers(envName, users) {
 
 program
   .command('deployments:create <name>')
+  .alias('deploy')
   .option('-d, --directory <directory>', "Directory which contains the Spore")
   .option('-e, --environment <name>', "Name of environment to create the deployment for")
   .description("Create a new deployment for a Spore")
