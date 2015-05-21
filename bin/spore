@@ -191,7 +191,9 @@ program
         return;
       }
 
-      app.users(options.environment || spore.defaultEnv(), function (err, users) {
+      var envName = options.environment || spore.defaultEnv();
+
+      app.users(envName, function (err, users) {
         if(err) return error(err);
 
         printUsers(envName, users);
