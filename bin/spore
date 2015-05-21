@@ -111,7 +111,7 @@ program
         return;
       }
 
-      var envName = options.environment || spore.defaultEnv();
+      var envName = options.environment || spore.config.defaultEnv();
 
       app.grant(envName, email, accessGranted(email, app.fullName() + "/" + envName));
     });
@@ -157,7 +157,7 @@ program
         return;
       }
 
-      var envName = options.environment || spore.defaultEnv();
+      var envName = options.environment || spore.config.defaultEnv();
 
       app.revoke(envName, email, accessRevoked(email, app.fullName() + "/" + envName));
     });
@@ -191,7 +191,7 @@ program
         return;
       }
 
-      var envName = options.environment || spore.defaultEnv();
+      var envName = options.environment || spore.config.defaultEnv();
 
       app.users(envName, function (err, users) {
         if(err) return error(err);
@@ -215,7 +215,7 @@ program
   .action(function (name, options) {
     loadApp(options.directory, function (app) {
 
-      var envName = options.environment || spore.defaultEnv();
+      var envName = options.environment || spore.config.defaultEnv();
 
       app.findEnv(envName).createDeployment(name, function (err, deployment) {
         if(err) return error(err);
@@ -281,7 +281,7 @@ program
         return;
       }
 
-      setForEnv(app, options.environment || spore.defaultEnv(), key);
+      setForEnv(app, options.environment || spore.config.defaultEnv(), key);
     });
   });
 
@@ -313,7 +313,7 @@ program
         return;
       }
 
-      getForEnv(app, options.environment || spore.defaultEnv(), key);
+      getForEnv(app, options.environment || spore.config.defaultEnv(), key);
     });
   });
 
@@ -356,7 +356,7 @@ program
   .action(function (cmds, options) {
     loadApp(options.directory, function (app) {
 
-      app.run(cmds, options.environment || spore.defaultEnv(), function (err, childProc) {
+      app.run(cmds, options.environment || spore.config.defaultEnv(), function (err, childProc) {
         if(err) return error(err);
 
         childProc.stdout.on('data', function (data) {
