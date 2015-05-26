@@ -50,8 +50,6 @@ module.exports = function (spore, utils) {
     if(Errors.noAppFound.test(err)) {
       utils.help("Make sure you're in your app's root, or create a new Spore with `spore init`");
     }
-    console.log(err);
-    console.log(err.stack);
   };
 
   utils.info = function (message) {
