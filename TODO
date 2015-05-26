@@ -1,5 +1,4 @@
 versions
-  - ruby version of the api
   - rails version of spore
 
 migrate
