@@ -2,6 +2,58 @@ var readline = require('readline-sync'),
     async = require('async');
 
 module.exports = function (program, spore, utils) {
+
+  program
+    .command('copy <sourceEnvironment>')
+    .option('-d, --directory <directory>', "Directory which contains the Spore")
+    .option('-e, --environment <name>', "Name of the target environment")
+    .option('-p, --prompt', "Prompt to set the value for each key rather than using the value from the source")
+    .description("Copy the keys from a target environment to a source environment")
+    .action(function (sourceName, options) {
+      var targetName = options.environment || spore.config.defaultEnv();
+
+      utils.loadApp(options.directory, function (app) {
+        app.get(sourceName, function (err, kv) {
+          if(err) return utils.error(err);
+
+          var keysSet = [],
+              getValue = function (key) {
+                return kv[key];
+              };
+
+          if(options.prompt) {
+            utils.log((targetName + ":").prompt);
+
+            getValue = function (key) {
+              return readline.question((spaces(2) + key + ": (Enter for \"${defaultInput}\", `-` to skip) ").prompt, {
+                defaultInput: kv[key],
+                keepWhitespace: true,
+                falseValue: '-'
+              });
+            };
+          }
+
+          async.each(Object.keys(kv), function (key, next) {
+
+            var value = getValue(key);
+
+            if(!value) {
+              return next();
+            }
+
+            keysSet.push(key);
+
+            app.set(targetName, key, value, next);
+
+          }, function (err) {
+            if(err) return utils.error(err);
+
+            utils.info(keysSet + " set for " + app.findEnv(targetName).fullName() + " from " + app.findEnv(sourceName).fullName());
+          });
+        });
+      });
+    });
+
   program
     .command('set <key>')
     .option('-d, --directory <directory>', "Directory which contains the Spore")
@@ -22,7 +74,7 @@ module.exports = function (program, spore, utils) {
 
           console.log((envNames + ":").prompt);
           
-          value = readline.question(("  " + key + "=").prompt);
+          value = readline.question((spaces(2) + key + ": ").prompt, { keepWhitespace: true });
 
           app.setAll(key, value, function (err) {
             if(err) return utils.error(err);
@@ -38,7 +90,7 @@ module.exports = function (program, spore, utils) {
           async.each(app.envs, function (env, next) {
             utils.log((env.name + ":").prompt);
 
-            var value = readline.question(("  " + key + "=").prompt);
+            var value = readline.question((spaces(2) + key + ": ").prompt);
 
             app.set(env.name, key, value, next);
           }, function (err) {
@@ -59,7 +111,7 @@ module.exports = function (program, spore, utils) {
   function setForEnv(app, envName, key) {
     utils.log((envName + ":").prompt);
     
-    value = readline.question(("  " + key + "=").prompt);
+    value = readline.question((spaces(2) + key + ": ").prompt);
 
     app.set(envName, key, value, function (err) {
       if(err) return utils.error(err);
@@ -108,15 +160,28 @@ module.exports = function (program, spore, utils) {
   }
 
   function printKvs(kv, tabs) {
+    var tabsRight = maxLength(Object.keys(kv));
+
     Object.keys(kv).forEach(function (key) {
-      printKv(key, kv[key], tabs);
+      printKv(key, kv[key], tabs, tabsRight);
     });
   }
 
-  function printKv(key, value, tabs) {
+  function printKv(key, value, tabs, tabsRight) {
     tabs = tabs || 0;
-    utils.log(new Array(tabs + 1).join(' ') + key + "=" + value);
+    tabsRight = tabsRight || key.length;
+    utils.log(spaces(tabs) + key + ": " + spaces(tabsRight - key.length) + value);
   }
 
   return program;
 };
+
+function spaces(n) {
+  return new Array(n + 1).join(' ');
+}
+
+function maxLength(arr) {
+  return Math.max.apply(null, arr.map(function (str) {
+    return str.length;
+  })) || 0;
+}
