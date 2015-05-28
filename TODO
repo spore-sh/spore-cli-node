@@ -1,16 +1,14 @@
 versions
   - rails version of spore
 
-migrate
-- heroku (set spore key on heroku server)
-  - how to distinguish production and staging?
-- dotenv
-
 install script
 - curl install.spore.sh | sh
   - should make sure npm is installed: `curl -L https://www.npmjs.com/install.sh | sh`
 - curl install.spore.sh/:token | sh
   - install spore, sign up for account, accept membership to app (which also verifies email)
+
+migrate
+- dotenv
 
 pricing
   - hosted version free for up to 5 users

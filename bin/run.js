@@ -22,7 +22,7 @@ module.exports = function (program, spore, utils) {
           });
 
           childProc.on('error', function (err) {
-            utils.error(err);
+            utils.error(err, false);
           });
 
           childProc.on('close', function (code) {

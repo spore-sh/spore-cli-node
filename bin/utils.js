@@ -45,10 +45,14 @@ module.exports = function (spore, utils) {
     console.log(message.data);
   };
 
-  utils.error = function (err) {
+  utils.error = function (err, exit) {
     console.error(err.message.error);
     if(Errors.noAppFound.test(err)) {
       utils.help("Make sure you're in your app's root, or create a new Spore with `spore init`");
+    }
+
+    if(exit !== false) {
+      process.exit(1);
     }
   };
 
