@@ -1,3 +1,4 @@
+var readline = require('readline-sync');
 
 module.exports = function (program, spore, utils) {
 
@@ -12,6 +13,12 @@ module.exports = function (program, spore, utils) {
       utils.loadApp(options.directory, function (app) {
 
         if(options.all) {
+          utils.warn("Granting read access to more than the development environment is dangerous.");
+          utils.warn("Any member of your team can already write environment variables, and reading anything beyond development is usually unnecesary.");
+          if(!readline.keyInYN("Are you sure you want to grant " + email + " access to all environments?")) {
+            return;
+          }
+
           app.grantAll(
             email,
             accessGranted(email, app.fullName() + "/" + app.envs.map(function (env) {
@@ -23,6 +30,14 @@ module.exports = function (program, spore, utils) {
         }
 
         var envName = options.environment || spore.config.defaultEnv();
+
+        if(envName !== 'development') {
+          utils.warn("Granting read access to more than the development environment is dangerous.");
+          utils.warn("Any member of your team can already write environment variables, and reading anything beyond development is usually unnecesary.");
+          if(!readline.keyInYN("Are you sure you want to grant " + email + " access to the " + envName + " environment?")) {
+            return;
+          }
+        }
 
         app.grant(envName, email, accessGranted(email, app.fullName() + "/" + envName));
       });

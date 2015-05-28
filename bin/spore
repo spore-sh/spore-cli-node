@@ -18,11 +18,11 @@ commands.migrate = require('./migrate');
 
 colors.setTheme({
   silly: 'rainbow',
-  input: 'grey',
+  input: 'white',
   verbose: 'cyan',
-  prompt: 'grey',
+  prompt: 'white',
   info: 'green',
-  data: 'grey',
+  data: 'white',
   help: 'cyan',
   warn: 'yellow',
   debug: 'blue',

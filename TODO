@@ -1,12 +1,3 @@
-versions
-  - rails version of spore
-
-install script
-- curl install.spore.sh | sh
-  - should make sure npm is installed: `curl -L https://www.npmjs.com/install.sh | sh`
-- curl install.spore.sh/:token | sh
-  - install spore, sign up for account, accept membership to app (which also verifies email)
-
 migrate
 - dotenv
 
