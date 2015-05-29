@@ -1,11 +1,16 @@
+var moniker = require('moniker');
+
 module.exports = function (program, spore, utils) {
   program
-    .command('deployments:create <name>')
+    .command('deployments:create [name]')
     .alias('deploy')
     .option('-d, --directory <directory>', "Directory which contains the Spore")
     .option('-e, --environment <name>', "Name of environment to create the deployment for")
     .description("Create a new deployment for a Spore")
     .action(function (name, options) {
+      if(!name) {
+        name = moniker.choose();
+      }
       utils.loadApp(options.directory, function (app) {
 
         var envName = options.environment || spore.config.defaultEnv();
