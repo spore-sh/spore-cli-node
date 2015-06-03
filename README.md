@@ -7,7 +7,7 @@ for more information.
 Installation
 ------------
 
-The best way to install the Spore CLI is using the install script for [Spore](https://spore.sh/documentation#installation).
+The best way to install the Spore CLI is using the [install script for Spore](https://spore.sh/documentation#installation).
 
 However, you can install the Spore CLI by itself with the following:
 
