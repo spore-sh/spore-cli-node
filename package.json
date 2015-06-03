@@ -10,6 +10,14 @@
   },
   "main": "lib/spore.js",
   "author": "Trey Griffith <trey@tgriff3.com>",
+  "homepage": "https://github.com/spore-sh/spore-cli-node",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/spore-sh/spore-cli-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/spore-sh/spore-cli-node/issues"
+  },
   "license": "MIT",
   "dependencies": {
     "async": "^0.9.0",
