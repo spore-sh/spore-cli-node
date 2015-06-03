@@ -18,7 +18,7 @@ $ npm install -g spore-cli
 or:
 
 ```
-$ npm install -g git://git@github.com:Teleborder/spore-cli-node.git
+$ npm install -g git://git@github.com:spore-sh/spore-cli-node.git
 ```
 
 Please note that if you install Spore CLI without the [install script](https://spore.sh/documentation#installation)
