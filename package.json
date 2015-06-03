@@ -9,7 +9,7 @@
     "spore": "bin/spore"
   },
   "main": "lib/spore.js",
-  "author": "Trey Griffith <trey@teleborder.com>",
+  "author": "Trey Griffith <trey@tgriff3.com>",
   "license": "MIT",
   "dependencies": {
     "async": "^0.9.0",
