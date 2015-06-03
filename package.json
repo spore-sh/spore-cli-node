@@ -31,7 +31,7 @@
     "moniker": "^0.1.2",
     "node-uuid": "^1.4.3",
     "readline-sync": "^1.2.14",
-    "spore": "git://git@github.com:spore-sh/spore-node.git",
-    "spore-errors": "0.0.1"
+    "spore-errors": "0.0.1",
+    "spore-node": "^0.9.0"
   }
 }
